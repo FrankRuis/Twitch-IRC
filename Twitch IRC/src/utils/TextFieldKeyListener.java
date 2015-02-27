@@ -68,6 +68,7 @@ public class TextFieldKeyListener extends KeyAdapter {
 			
 			// Create a chat message object and send it to the GUI
 			gui.append(new ChatMessage(gui.getCurrentUser(), Color.black, 16, "Calibri", false, false, message, gui.getActiveTab()));
+			gui.getClient().sendChatMessage(message, gui.getActiveTab());
 			
 			source.setText("");
 			historyPos = 0;

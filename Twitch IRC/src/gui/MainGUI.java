@@ -1,5 +1,8 @@
 package gui;
 
+import irc.IRCClient;
+import irc.IRCProtocol;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -57,9 +60,13 @@ public class MainGUI implements ActionListener, Observer {
 	private Map<String, JTextPane> chatPanes;
 	
 	private JButton btnConnect;
+	private JButton btnLogin;
+	
 	private JTextField inputField;
 	
 	private User currentUser;
+	
+	private IRCClient client;
 	
 	// Whether or not timestamps should be displayed for messages and notifications
 	private boolean useTimestamps = true;
@@ -240,6 +247,13 @@ public class MainGUI implements ActionListener, Observer {
 	}
 	
 	/**
+	 * @return The IRC client object
+	 */
+	public IRCClient getClient() {
+		return client;
+	}
+	
+	/**
 	 * Called when a button is pressed
 	 * @param ActionEvent The action event
 	 */
@@ -248,9 +262,21 @@ public class MainGUI implements ActionListener, Observer {
 		// Save which button called the event
 		Object source = e.getSource();
 		
+		// If the connect button was pressed
 		if (source.equals(btnConnect)) {
-			//TODO connect button action
-			notify("Connecting to server", getActiveTab());
+			// Create the client and add the GUI as an observer
+			client = new IRCClient(IRCProtocol.TWITCH_HOST);
+			client.addObserver(this);
+			
+			Thread clientThread = new Thread(client);
+			clientThread.start();
+			
+			notify("Connecting to the twitch IRC server.", getActiveTab());
+		}
+		
+		// If the login button was pressed
+		if (source.equals(btnLogin)) {
+			client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
 		}
 	}
 	
@@ -325,9 +351,15 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// Create the connect button
 		btnConnect = new JButton("Connect");
-		buttonPanel.add(btnConnect);
 		btnConnect.setFocusable(false);
 		btnConnect.addActionListener(this);
+		buttonPanel.add(btnConnect);
+		
+		// Create the login button
+		btnLogin = new JButton("Login");
+		btnLogin.setFocusable(false);
+		btnLogin.addActionListener(this);
+		buttonPanel.add(btnLogin);
 		
 		// Create and add the west panel
 		JPanel westPanel = new JPanel();
@@ -337,9 +369,7 @@ public class MainGUI implements ActionListener, Observer {
 		JPanel eastPanel = new JPanel();
 		frame.getContentPane().add(eastPanel, BorderLayout.EAST);
 		
-		// Create the tab containing the main chat room
+		// Create a tab
 		newTab("Chat");
-		
-		currentUser = new User("TestUser", null);
 	}
 }

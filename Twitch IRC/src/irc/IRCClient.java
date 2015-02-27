@@ -34,7 +34,7 @@ public class IRCClient extends Observable implements Runnable {
 	private boolean run ;
 	
 	// Whether or not logging should be enabled
-	private boolean enableLogging = true;
+	private boolean loggingEnabled = true;
 
 	/**
 	 * Constructor
@@ -63,11 +63,11 @@ public class IRCClient extends Observable implements Runnable {
 			// Allow the loop to start
 			run = true;
 			
-			log("Connected");
+			log("Connected.");
 		} catch (UnknownHostException e) {
 			log("Error: Unknown Host.");
 		} catch (IOException e) {
-			log("Error: IOException.");
+			log("Error: IOException while connecting.");
 		}
 	}
 	
@@ -82,7 +82,7 @@ public class IRCClient extends Observable implements Runnable {
 	}
 	
 	@Override
-	public void run() {
+	public void run() {	
 		this.connect();
 		
 		// Keep running if run is set to true
@@ -112,23 +112,25 @@ public class IRCClient extends Observable implements Runnable {
 	}
 	
 	/**
+	 * Send a chat message to the given channel
+	 * @param message
+	 */
+	public void sendChatMessage(String message, String channel) {
+		outQueue.addMessage(IRCProtocol.MESSAGE + " " + channel + " :" + message + "\r\n");
+	}
+	
+	/**
 	 * Add the given message to the log
 	 * @param message The message to log
 	 */
 	public void log(String message) {
 		// Don't do anything if logging is disabled
-		if (enableLogging) {
+		if (loggingEnabled) {
 			// Create a timestamp for the message
 			SimpleDateFormat sdf = new SimpleDateFormat("[HH:mm]");
 			String time = sdf.format(new Date());
 			
 			System.out.println(time + " " + message);
 		}
-	}
-	
-	public static void main(String[] args) {
-		IRCClient client = new IRCClient("199.9.250.239");
-		Thread t = new Thread(client);
-		t.start();
 	}
 }

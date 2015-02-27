@@ -18,6 +18,11 @@ public class IRCProtocol {
 	public static final String TWITCHCLIENT = "TWITCHCLIENT 3";
 	
 	/**
+	 * The address of the twitch IRC server
+	 */
+	public static final String TWITCH_HOST = "irc.twitch.tv";
+	
+	/**
 	 * Start of the message of the day
 	 */
 	public static final String MOTD_START = "375";
@@ -56,4 +61,9 @@ public class IRCProtocol {
 	 * USER command for specifying the username, hostname, servername and realname of a new user
 	 */
 	public static final String USER = "USER";
+	
+	/**
+	 * PRIVMSG command for sending a message to a channel
+	 */
+	public static final String MESSAGE = "PRIVMSG";
 }
