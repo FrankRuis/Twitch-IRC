@@ -41,6 +41,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+import utils.ChatMessageBuilder;
 import utils.ClickableListener;
 import utils.EmoticonListener;
 import utils.TextFieldKeyListener;
@@ -309,7 +310,7 @@ public class MainGUI implements ActionListener, Observer {
 				break;
 			case "MESSAGE":
 				// Received a message from the IRC client
-				append(new ChatMessage(new User(command[2], null), Color.black, 16, "Calibri", false, false, command[3], command[1]));
+				append(ChatMessageBuilder.getRegularMessage(command[3], command[1], new User(command[2], null)));
 				break;
 		}
 	}
