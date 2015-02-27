@@ -23,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -56,6 +57,8 @@ public class MainGUI implements ActionListener, Observer {
 	// Maximum amount of characters to display in a single JTextPane
 	private final int MAX_CHARS = 5000;
 	
+	private final String LOGTAB = "Log";
+	
 	private JFrame frame;
 
 	private JTabbedPane tabPanel;
@@ -65,6 +68,7 @@ public class MainGUI implements ActionListener, Observer {
 	private JMenu mActions;
 	private JMenuItem miConnect;
 	private JMenuItem miLogin;
+	private JMenuItem miJoinChannel;
 	
 	private JTextField inputField;
 	
@@ -279,17 +283,33 @@ public class MainGUI implements ActionListener, Observer {
 		// If the login button was pressed
 		if (source.equals(miLogin)) {
 			client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
+			currentUser = new User("Kaascroissant", null);
 			inputField.setEnabled(true);
+		}
+		
+		// If the login button was pressed
+		if (source.equals(miJoinChannel)) {
+			String channel = (String) JOptionPane.showInputDialog(frame, "Enter the channel you wish to join:\n", "Join a channel", JOptionPane.PLAIN_MESSAGE, null, null, "");
+			client.sendMessage("JOIN #" + channel + "\r\n");
+			newTab(channel);
+			notify("You have joined the channel " + channel + ".", LOGTAB);
 		}
 	}
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		String[] command = ((String) arg).split("\\s", 3);
-		System.out.println(arg);
+		// Split the command on up to 4 whitespaces
+		String[] command = ((String) arg).split("\\s", 4);
+
+		// Check the command type
 		switch (command[0]) {
 			case "NOTIFY":
-				notify(command[2], command[1]);
+				// Received a notification from the IRC client
+				notify(command[3], command[1]);
+				break;
+			case "MESSAGE":
+				// Received a message from the IRC client
+				append(new ChatMessage(new User(command[2], null), Color.black, 16, "Calibri", false, false, command[3], command[1]));
 				break;
 		}
 	}
@@ -351,12 +371,18 @@ public class MainGUI implements ActionListener, Observer {
 		//Create the menu bar
 		menuBar = new JMenuBar();
 		mActions = new JMenu("Actions");
+		
 		miConnect = new JMenuItem("Connect");
 		miConnect.addActionListener(this);
 		miLogin = new JMenuItem("Login");
 		miLogin.addActionListener(this);
+		miJoinChannel = new JMenuItem("Join channel");
+		miJoinChannel.addActionListener(this);
+		
 		mActions.add(miConnect);
 		mActions.add(miLogin);
+		mActions.add(miJoinChannel);
+		
 		menuBar.add(mActions);
 		frame.setJMenuBar(menuBar);
 		
@@ -375,6 +401,6 @@ public class MainGUI implements ActionListener, Observer {
 		frame.getContentPane().add(eastPanel, BorderLayout.EAST);
 		
 		// Create a tab
-		newTab("Chat");
+		newTab(LOGTAB);
 	}
 }

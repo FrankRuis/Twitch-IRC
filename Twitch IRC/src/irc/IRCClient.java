@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Observable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import utils.OutQueue;
 
@@ -65,18 +67,18 @@ public class IRCClient extends Observable implements Runnable {
 			
 			// Notify the GUI
 			setChanged();
-			notifyObservers("NOTIFY Chat Succesfully connected to " + host);
+			notifyObservers("NOTIFY Log * Succesfully connected to " + host);
 			
-			log("Connected.");
+			log("Connected to " + host);
 		} catch (UnknownHostException e) {
 			// Notify the GUI
 			setChanged();
-			notifyObservers("NOTIFY Chat Could not recognize the host " + host);
+			notifyObservers("NOTIFY Log * Could not recognize the host " + host);
 			log("Error: Unknown Host.");
 		} catch (IOException e) {
 			// Notify the GUI
 			setChanged();
-			notifyObservers("NOTIFY Chat Error while connecting to " + host);
+			notifyObservers("NOTIFY Log * Error while connecting to " + host);
 			log("Error: IOException while connecting.");
 		}
 	}
@@ -91,6 +93,24 @@ public class IRCClient extends Observable implements Runnable {
 		this.sendMessage(IRCProtocol.TWITCHCLIENT + "\r\n");
 	}
 	
+	/**
+	 * Get the username from an IRC protocol message
+	 * @param usernameString The IRC protocol messge containing the username
+	 * @return
+	 */
+	public String parseUserName(String usernameString) {
+		// Match the username and capture it with a regular expression
+		Pattern pattern = Pattern.compile(":([[a-zA-Z0-9_]]+)!");
+		Matcher matcher = pattern.matcher(usernameString);
+
+		// Return the first captured string
+		if (matcher.find()) {
+			return matcher.group(1);
+		} else {
+			return null;
+		}
+	}
+	
 	@Override
 	public void run() {	
 		this.connect();
@@ -100,6 +120,46 @@ public class IRCClient extends Observable implements Runnable {
 			try {
 				String line = null;
 				while ((line = in.readLine()) != null) {
+					// Split the message on up to 4 whitespaces
+					String[] message = line.split("\\s", 4);
+					
+					// If we received a ping, reply with a pong
+					if (message[0].equals(IRCProtocol.PING)) {
+						sendMessage(IRCProtocol.PONG + message[1] + "\r\n");
+					}
+					
+					// Check the message type
+					switch (message[1]) {
+						case IRCProtocol.MOTD_END:
+							// Message of the day end received, login was successful
+							setChanged();
+							notifyObservers("NOTIFY Log * You have logged in successfully.");
+							break;
+						case IRCProtocol.MOTD:
+							// Show the message of the day in the GUI
+							setChanged();
+							notifyObservers("NOTIFY Log * The message of the day is: " + message[3].substring(1));
+							break;
+						case IRCProtocol.MESSAGE:
+							// We received a message
+							String username = parseUserName(message[0]);
+							
+							// If the user is not jtv
+							if (!username.equals("jtv")) {
+								// Let the GUI know we have received a message
+								String channel = message[2].substring(1);
+								String messageContents = message[3].substring(1);
+								
+								setChanged();
+								notifyObservers("MESSAGE " + channel + " " + username + " " + messageContents);
+							
+							// If the user is jtv, parse the user information
+							} else {
+								
+							}
+							break;
+					}
+					
 					log(line);
 				}
 			} catch (IOException e) {
@@ -127,6 +187,7 @@ public class IRCClient extends Observable implements Runnable {
 	 */
 	public void sendChatMessage(String message, String channel) {
 		outQueue.addMessage(IRCProtocol.MESSAGE + " " + channel + " :" + message + "\r\n");
+		log(IRCProtocol.MESSAGE + " " + channel + " :" + message + "\r\n");
 	}
 	
 	/**
