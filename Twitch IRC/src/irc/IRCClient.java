@@ -63,10 +63,20 @@ public class IRCClient extends Observable implements Runnable {
 			// Allow the loop to start
 			run = true;
 			
+			// Notify the GUI
+			setChanged();
+			notifyObservers("NOTIFY Chat Succesfully connected to " + host);
+			
 			log("Connected.");
 		} catch (UnknownHostException e) {
+			// Notify the GUI
+			setChanged();
+			notifyObservers("NOTIFY Chat Could not recognize the host " + host);
 			log("Error: Unknown Host.");
 		} catch (IOException e) {
+			// Notify the GUI
+			setChanged();
+			notifyObservers("NOTIFY Chat Error while connecting to " + host);
 			log("Error: IOException while connecting.");
 		}
 	}

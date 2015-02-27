@@ -19,8 +19,10 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -38,11 +40,11 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-import dataobjects.ChatMessage;
-import dataobjects.User;
 import utils.ClickableListener;
 import utils.EmoticonListener;
 import utils.TextFieldKeyListener;
+import dataobjects.ChatMessage;
+import dataobjects.User;
 
 /**
  * Main graphical user interface for the chat
@@ -59,8 +61,10 @@ public class MainGUI implements ActionListener, Observer {
 	private JTabbedPane tabPanel;
 	private Map<String, JTextPane> chatPanes;
 	
-	private JButton btnConnect;
-	private JButton btnLogin;
+	private JMenuBar menuBar;
+	private JMenu mActions;
+	private JMenuItem miConnect;
+	private JMenuItem miLogin;
 	
 	private JTextField inputField;
 	
@@ -263,26 +267,31 @@ public class MainGUI implements ActionListener, Observer {
 		Object source = e.getSource();
 		
 		// If the connect button was pressed
-		if (source.equals(btnConnect)) {
+		if (source.equals(miConnect)) {
 			// Create the client and add the GUI as an observer
 			client = new IRCClient(IRCProtocol.TWITCH_HOST);
 			client.addObserver(this);
 			
 			Thread clientThread = new Thread(client);
 			clientThread.start();
-			
-			notify("Connecting to the twitch IRC server.", getActiveTab());
 		}
 		
 		// If the login button was pressed
-		if (source.equals(btnLogin)) {
+		if (source.equals(miLogin)) {
 			client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
+			inputField.setEnabled(true);
 		}
 	}
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO update method
+		String[] command = ((String) arg).split("\\s", 3);
+		System.out.println(arg);
+		switch (command[0]) {
+			case "NOTIFY":
+				notify(command[2], command[1]);
+				break;
+		}
 	}
 	
 	/**
@@ -339,27 +348,23 @@ public class MainGUI implements ActionListener, Observer {
 		inputPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
 		southPanel.add(inputPanel);
 		
+		//Create the menu bar
+		menuBar = new JMenuBar();
+		mActions = new JMenu("Actions");
+		miConnect = new JMenuItem("Connect");
+		miConnect.addActionListener(this);
+		miLogin = new JMenuItem("Login");
+		miLogin.addActionListener(this);
+		mActions.add(miConnect);
+		mActions.add(miLogin);
+		menuBar.add(mActions);
+		frame.setJMenuBar(menuBar);
+		
 		// Create the input text field
 		inputField = new JTextField();
 		inputField.addKeyListener(new TextFieldKeyListener(this));
 		inputField.setEnabled(false);
 		inputPanel.add(inputField);
-		
-		// Create and add the button panel
-		JPanel buttonPanel = new JPanel();
-		southPanel.add(buttonPanel);
-		
-		// Create the connect button
-		btnConnect = new JButton("Connect");
-		btnConnect.setFocusable(false);
-		btnConnect.addActionListener(this);
-		buttonPanel.add(btnConnect);
-		
-		// Create the login button
-		btnLogin = new JButton("Login");
-		btnLogin.setFocusable(false);
-		btnLogin.addActionListener(this);
-		buttonPanel.add(btnLogin);
 		
 		// Create and add the west panel
 		JPanel westPanel = new JPanel();
