@@ -71,6 +71,16 @@ public class IRCClient extends Observable implements Runnable {
 		}
 	}
 	
+	/**
+	 * Log in to the server
+	 */
+	public void login(String nickname, String password) {
+		this.sendMessage(IRCProtocol.PASSWORD + " " + password + "\r\n");
+		this.sendMessage(IRCProtocol.NICKNAME + " " + nickname + "\r\n");
+		this.sendMessage(IRCProtocol.USER + " " + nickname + " 0 * :" + nickname + "\r\n");
+		this.sendMessage(IRCProtocol.TWITCHCLIENT + "\r\n");
+	}
+	
 	@Override
 	public void run() {
 		this.connect();
@@ -88,6 +98,17 @@ public class IRCClient extends Observable implements Runnable {
 		}
 		
 		log("IRC Client stopped.");
+	}
+	
+	/**
+	 * Send a message to the output stream
+	 * @param message The message to send
+	 */
+	public void sendMessage(String message) {
+		// Add the message to the out queue
+		outQueue.addMessage(message);
+		
+		log(message);
 	}
 	
 	/**

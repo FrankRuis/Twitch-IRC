@@ -257,7 +257,6 @@ public class MainGUI implements ActionListener, Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		// TODO update method
-		
 	}
 	
 	/**
@@ -317,6 +316,7 @@ public class MainGUI implements ActionListener, Observer {
 		// Create the input text field
 		inputField = new JTextField();
 		inputField.addKeyListener(new TextFieldKeyListener(this));
+		inputField.setEnabled(false);
 		inputPanel.add(inputField);
 		
 		// Create and add the button panel

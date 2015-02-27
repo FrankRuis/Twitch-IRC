@@ -13,27 +13,47 @@ public class IRCProtocol {
 	public static final int PORT = 6667;
 
 	/**
-	 * Server welcome code
+	 * The version of the twitch client we want to use
 	 */
-	public static final String WELCOME = "376";
+	public static final String TWITCHCLIENT = "TWITCHCLIENT 3";
 	
 	/**
-	 * Online users code
+	 * Start of the message of the day
 	 */
-	public static final String ONLINE_USERS = "353";
+	public static final String MOTD_START = "375";
 	
 	/**
-	 * Username already in use error code
+	 * The message of the day
 	 */
-	public static final String USERNAME_IN_USE = "433";
+	public static final String MOTD = "372";
 	
 	/**
-	 * Pong message, reply to a ping
+	 * End of the message of the day
+	 */
+	public static final String MOTD_END = "376";
+	
+	/**
+	 * Pong command, the reply to a ping
 	 */
 	public static final String PONG = "PONG";
 
 	/**
-	 * Ping message, must be replied to with a pong
+	 * Ping command, server checking if we're still there, must be replied to with a pong
 	 */
 	public static final String PING = "PING";
+	
+	/**
+	 * Protocol command for sending a user's password when logging in
+	 */
+	public static final String PASSWORD = "PASS";
+	
+	/**
+	 * Protocol command for sending a user's nickname when logging in
+	 */
+	public static final String NICKNAME = "NICK";
+	
+	/**
+	 * USER command for specifying the username, hostname, servername and realname of a new user
+	 */
+	public static final String USER = "USER";
 }
