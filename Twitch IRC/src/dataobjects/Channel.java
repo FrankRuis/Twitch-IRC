@@ -23,6 +23,7 @@ public class Channel {
 	private ImageIcon adminBadge;
 	private ImageIcon broadcasterBadge;
 	private ImageIcon modBadge;
+	private ImageIcon global_modBadge;
 	
 	/**
 	 * Constructor
@@ -71,6 +72,7 @@ public class Channel {
 			modBadge = badges.getMod() != null ? new ImageIcon(ImageIO.read(new URL(badges.getMod().getImage()))) : null;
 			broadcasterBadge = badges.getBroadcaster() != null ? new ImageIcon(ImageIO.read(new URL(badges.getBroadcaster().getImage()))) : null;
 			adminBadge = badges.getAdmin() != null ? new ImageIcon(ImageIO.read(new URL(badges.getAdmin().getImage()))) : null;
+			global_modBadge = badges.getGlobal_mod() != null ? new ImageIcon(ImageIO.read(new URL(badges.getGlobal_mod().getImage()))) : null;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -111,6 +113,13 @@ public class Channel {
 	 */
 	public ImageIcon getModBadge() {
 		return modBadge;
+	}
+	
+	/**
+	 * @return the global_modBadge
+	 */
+	public ImageIcon getGlobal_modBadge() {
+		return global_modBadge;
 	}
 
 	@Override

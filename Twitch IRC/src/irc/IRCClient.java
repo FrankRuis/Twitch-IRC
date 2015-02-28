@@ -204,7 +204,9 @@ public class IRCClient extends Observable implements Runnable {
 									} else {
 										// TODO remove single message
 									}
-								} else {
+								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.HOSTTARGET)) { 
+									// TODO Stream is hosting different stream
+								}	else {
 									// Not one of the commands, send the text as a notification
 									setChanged();
 									notifyObservers("NOTIFY " + channel + " * " + messageContents);

@@ -103,6 +103,11 @@ public class IRCProtocol {
 	public static final String CLEAR = "CLEARCHAT";
 	
 	/**
+	 * HOSTTARGET command specifying the channel the current channel is hosting
+	 */
+	public static final String HOSTTARGET = "HOSTTARGET";
+	
+	/**
 	 * HISTORYEND command
 	 */
 	public static final String HISTORYEND = "HISTORYEND";
