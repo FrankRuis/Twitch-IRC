@@ -34,10 +34,10 @@ public class IRCClient extends Observable implements Runnable {
 	private OutQueue outQueue;
 	
 	// Whether or not the client should keep running
-	private boolean run ;
+	private boolean run;
 	
 	// Whether or not logging should be enabled
-	private boolean loggingEnabled = true;
+	private boolean loggingEnabled = false;
 	
 	private ConnectedUsers userList;
 

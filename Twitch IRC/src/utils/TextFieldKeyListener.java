@@ -65,8 +65,7 @@ public class TextFieldKeyListener extends KeyAdapter {
 			
 			// Create a chat message object and send it to the GUI
 			if (message.charAt(0) != '/') {
-				System.out.println(message.charAt(0));
-				// Don't append the message to the chat if it was a command (Starts with a \)
+				// Don't append the message to the chat if it was a command (Starts with a /)
 				gui.append(ChatMessageBuilder.getRegularMessage(message, gui.getActiveTab(), gui.getCurrentUser()));
 			}
 			gui.getClient().sendChatMessage(message, "#" + gui.getActiveTab());

@@ -336,7 +336,11 @@ public class MainGUI implements ActionListener, Observer {
 				break;
 			case "MESSAGE":
 				// Received a message from the IRC client
-				append(ChatMessageBuilder.getRegularMessage(command[3], command[1], userList.getUser(command[2])));
+				if (command[3].startsWith(IRCProtocol.ACTION)) {
+					append(ChatMessageBuilder.getActionMessage(command[3].substring(IRCProtocol.ACTION.length()), command[1], userList.getUser(command[2])));
+				} else {
+					append(ChatMessageBuilder.getRegularMessage(command[3], command[1], userList.getUser(command[2])));
+				}
 				break;
 		}
 	}

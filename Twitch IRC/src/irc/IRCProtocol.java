@@ -110,7 +110,7 @@ public class IRCProtocol {
 	/**
 	 * ACTION command, user message should be same color as their user name
 	 */
-	public static final String ACTION = "ACTION";
+	public static final String ACTION = "ACTION";
 	
 	/**
 	 * The IRC account for announcing things like new subscribers
