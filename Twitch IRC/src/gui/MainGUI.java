@@ -36,6 +36,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -43,7 +44,7 @@ import javax.swing.text.StyledDocument;
 
 import utils.ChatMessageBuilder;
 import utils.ClickableListener;
-import utils.EmoticonListener;
+import utils.EmoticonInserter;
 import utils.TextFieldKeyListener;
 import TwitchAPI.ChannelData;
 import dataobjects.Channel;
@@ -80,7 +81,7 @@ public class MainGUI implements ActionListener, Observer {
 	
 	private User currentUser;
 	
-	private EmoticonListener emoticonListener;
+	private EmoticonInserter emoticonInserter;
 	
 	private IRCClient client;
 	private ConnectedUsers userList;
@@ -118,10 +119,6 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// Add a mouse listener to allow certain elements in the chat pane to be clickable
 		chatPane.addMouseListener(new ClickableListener(chatPane));
-		
-		// Add a document listener to check for emoticons
-		emoticonListener = new EmoticonListener(MAX_CHARS);
-		chatPane.getStyledDocument().addDocumentListener(emoticonListener);
 		
 		// Create a JScrollPane for the JTextPane
 		JScrollPane chatScrollPane = new JScrollPane();
@@ -200,8 +197,20 @@ public class MainGUI implements ActionListener, Observer {
 			if (useTimestamps) doc.insertString(doc.getLength(), time  + " ", timeAset);
 			doc.insertString(doc.getLength(), name  + ": ", unameAset);
 			doc.insertString(doc.getLength(), message.getMessage()  + "\n", attributeSet);
+			
+			emoticonInserter.insertEmoticons(doc, message.getMessage().length());
 		} catch (BadLocationException e) {
 			e.printStackTrace();
+		}
+		
+		// Remove first line if the character limit has been reached
+		if (doc.getLength() > MAX_CHARS) {
+			Element firstLine = doc.getDefaultRootElement().getElement(0);
+			try {
+				doc.remove(firstLine.getStartOffset(), firstLine.getEndOffset());
+			} catch (BadLocationException ex) {
+				ex.printStackTrace();
+			}
 		}
 		
 		// Make sure the scroll bar is set to the end of the text panel
@@ -231,6 +240,16 @@ public class MainGUI implements ActionListener, Observer {
 			doc.insertString(doc.getLength(), notification + "\n", attributeSet);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
+		}
+		
+		// Remove first line if the character limit has been reached
+		if (doc.getLength() > MAX_CHARS) {
+			Element firstLine = doc.getDefaultRootElement().getElement(0);
+			try {
+				doc.remove(firstLine.getStartOffset(), firstLine.getEndOffset());
+			} catch (BadLocationException ex) {
+				ex.printStackTrace();
+			}
 		}
 		
 		// Make sure the scroll bar is set to the end of the text panel
@@ -298,7 +317,7 @@ public class MainGUI implements ActionListener, Observer {
 			
 			// Add the channel's emoticons to the emoticon listener
 			for (Emoticons emoticon : channelObject.getEmoticons().getEmoticonsList()) {
-				emoticonListener.addEmoticon(emoticon.getRegex(), emoticon.getUrl());
+				emoticonInserter.addEmoticon(emoticon.getRegex(), emoticon.getUrl());
 			}
 			
 			notify("You have joined the channel " + channel + ".", LOGTAB);
@@ -357,6 +376,7 @@ public class MainGUI implements ActionListener, Observer {
 		userList = new ConnectedUsers();
 		chatPanes = new HashMap<>();
 		channels = new HashMap<>();
+		emoticonInserter = new EmoticonInserter();
 
         try {
         	// Try to get the system's look and feel
