@@ -5,6 +5,7 @@ import irc.IRCProtocol;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
@@ -108,6 +109,7 @@ public class MainGUI implements ActionListener, Observer {
 		final JTextPane chatPane = new JTextPane();
 		chatPane.setContentType("text/plain; charset=UTF-8");
 		chatPane.setEditable(false);
+		chatPane.setCursor(new Cursor(Cursor.TEXT_CURSOR));
 		
 		// Add a mouse listener to allow certain elements in the chat pane to be clickable
 		chatPane.addMouseListener(new ClickableListener(chatPane));
@@ -367,7 +369,7 @@ public class MainGUI implements ActionListener, Observer {
         
         // Initialize the JFrame
 		frame = new JFrame();
-		frame.setIconImage(Toolkit.getDefaultToolkit().getImage("Images/chat.png"));
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage("Images/TwitchIcon.png"));
 		frame.setTitle("Twitch IRC");
 		frame.setSize(500, 500);
 		frame.setMinimumSize(new Dimension(300,300));

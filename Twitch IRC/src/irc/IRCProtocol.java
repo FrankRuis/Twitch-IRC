@@ -98,7 +98,7 @@ public class IRCProtocol {
 	public static final String SPECIALUSER = "SPECIALUSER";
 	
 	/**
-	 * CLEARCHAT command, sent when a moderator has cleared the chat
+	 * CLEARCHAT command, sent when a moderator has cleared the chat or deleted a single message
 	 */
 	public static final String CLEAR = "CLEARCHAT";
 	
@@ -106,4 +106,19 @@ public class IRCProtocol {
 	 * HISTORYEND command
 	 */
 	public static final String HISTORYEND = "HISTORYEND";
+	
+	/**
+	 * ACTION command, user message should be same color as their user name
+	 */
+	public static final String ACTION = "ACTION";
+	
+	/**
+	 * The IRC account for announcing things like new subscribers
+	 */
+	public static final String TWITCHNOTIFY = "twitchnotify";
+	
+	/**
+	 * The IRC account for sending user information and channel status messages
+	 */
+	public static final String JTV = "jtv";
 }

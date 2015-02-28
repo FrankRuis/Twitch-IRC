@@ -165,38 +165,49 @@ public class IRCClient extends Observable implements Runnable {
 							// Add the user to the list of connected users
 							userList.addUser(username, channel);
 							
-							// If the user is not jtv
-							if (!username.equals("jtv")) {
-								
+							// If the user is not jtv or twitchnotify
+							if (!username.equals(IRCProtocol.JTV) && !username.equals(IRCProtocol.TWITCHNOTIFY)) {
 								// Let the GUI know we have received a message
 								setChanged();
 								notifyObservers("MESSAGE " + channel + " " + username + " " + messageContents);
 							
 							// If the user is jtv, parse the command information
-							} else {
-								String[] userInfo = message[3].split("\\s", 3);
-								if (userInfo.length > 1) {
-									userList.addUser(userInfo[1], channel);
+							} else if (username.equals(IRCProtocol.JTV)) {
+								String[] twitchCommand = message[3].split("\\s", 3);
+								if (twitchCommand.length > 1) {
+									userList.addUser(twitchCommand[1], channel);
 								}
 								
 								// Check the type of information
-								if (userInfo[0].substring(1).equals(IRCProtocol.USERCOLOR)) {
-									userList.setUserColor(userInfo[1], userInfo[2]);
-								} else if (userInfo[0].substring(1).equals(IRCProtocol.EMOTESET)) {
+								if (twitchCommand[0].substring(1).equals(IRCProtocol.USERCOLOR)) {
+									userList.setUserColor(twitchCommand[1], twitchCommand[2]);
+								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.EMOTESET)) {
 									// TODO emoteset
-								} else if (userInfo[0].substring(1).equals(IRCProtocol.SPECIALUSER)) {
+								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.SPECIALUSER)) {
 									// TODO specialuser
-								} else if (userInfo[0].substring(1).equals(IRCProtocol.HISTORYEND)) {
+								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.HISTORYEND)) {
 									// TODO historyend
-								} else if (userInfo[0].substring(1).equals(IRCProtocol.CLEAR)) {
-									// Notify the GUI that the chat has been cleared
-									setChanged();
-									notifyObservers("NOTIFY " + channel + " * Chat was cleared by a moderator.");
+								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.CLEAR)) {
+									if (twitchCommand.length == 1) {
+										// Notify the GUI that the chat has been cleared
+										setChanged();
+										notifyObservers("NOTIFY " + channel + " * Chat was cleared by a moderator.");
+									
+									// If the length is larger than 1 the command also contains a username
+									} else {
+										// TODO remove single message
+									}
 								} else {
 									// Not one of the commands, send the text as a notification
 									setChanged();
 									notifyObservers("NOTIFY " + channel + " * " + messageContents);
 								}
+							
+							// If the user is twitchnotify, send the message as a notification
+							} else if (username.equals(IRCProtocol.TWITCHNOTIFY)) {
+								// Let the GUI know we have received a message
+								setChanged();
+								notifyObservers("NOTIFY " + channel + " * " + messageContents);
 							}
 							break;
 					}

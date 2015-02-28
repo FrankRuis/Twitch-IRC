@@ -52,7 +52,7 @@ public class EmoticonListener implements DocumentListener {
 				try {
 					insertion = doc.getText(e.getOffset(), e.getLength());
 				} catch (BadLocationException ex) {
-					ex.printStackTrace();
+					
 				}
 				
 				// Go through all possible emoticons

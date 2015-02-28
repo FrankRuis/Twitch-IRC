@@ -14,6 +14,13 @@ public class ConnectedUsers {
 	// The list of connected users
 	private Map<String, User> users;
 	
+	// The default username colors used by twitch
+	private String[] defaultColors = {"#FF0000","#0000FF","#00FF00",
+									  "#B22222","#FF7F50","#9ACD32",
+									  "#FF4500","#2E8B57","#DAA520",
+									  "#D2691E","#5F9EA0","#1E90FF",
+									  "#FF69B4","#8A2BE2","#00FF7F"};
+	
 	/**
 	 * Constructor
 	 */
@@ -28,11 +35,20 @@ public class ConnectedUsers {
 	 */
 	public void addUser(String name, String channel) {
 		if (!users.containsKey(name)) {
-			User user = new User(name, null);
+			// Choose the default color based on the ASCII values of the username's first and last character
+			int n = (name.toUpperCase().charAt(0) + name.charAt(name.length() - 1));
+			String colorString = defaultColors[n % defaultColors.length];
+			Color color = new Color(Integer.valueOf(colorString.substring(1, 3), 16),
+		            				Integer.valueOf(colorString.substring(3, 5), 16),
+		            				Integer.valueOf(colorString.substring(5, 7), 16));
+			
+			// Create a new user and let it join the channel
+			User user = new User(name, color);
 			user.join(channel);
 			
 			users.put(name, user);
 		} else {
+			// Let the user join the channel
 			users.get(name).join(channel);
 		}
 	}
@@ -84,9 +100,13 @@ public class ConnectedUsers {
 	 */
 	public void setUserColor(String name, String hexColor) {
 		if (users.containsKey(name)) {
-			// Convert the hexadecimal color string to a Color object
-			Color color = new Color(Integer.valueOf(hexColor.substring(1, 3), 16), Integer.valueOf( hexColor.substring(3, 5), 16), Integer.valueOf(hexColor.substring(5, 7), 16));
-			users.get(name).setColor(color);
+			try {
+				// Convert the hexadecimal color string to a Color object
+				Color color = new Color(Integer.valueOf(hexColor.substring(1, 3), 16), Integer.valueOf( hexColor.substring(3, 5), 16), Integer.valueOf(hexColor.substring(5, 7), 16));
+				users.get(name).setColor(color);
+			} catch (NumberFormatException e) {
+				// Sometimes twitch sends a word instead of a hex string as color
+			}
 		}
 	}
 }
