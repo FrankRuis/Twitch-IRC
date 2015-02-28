@@ -66,4 +66,9 @@ public class IRCProtocol {
 	 * PRIVMSG command for sending a message to a channel
 	 */
 	public static final String MESSAGE = "PRIVMSG";
+	
+	/**
+	 * USERCOLOR command for specifying the color of a username
+	 */
+	public static final String USERCOLOR = "USERCOLOR";
 }

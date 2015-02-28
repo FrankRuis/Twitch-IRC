@@ -46,6 +46,7 @@ import utils.ClickableListener;
 import utils.EmoticonListener;
 import utils.TextFieldKeyListener;
 import dataobjects.ChatMessage;
+import dataobjects.ConnectedUsers;
 import dataobjects.User;
 
 /**
@@ -76,6 +77,7 @@ public class MainGUI implements ActionListener, Observer {
 	private User currentUser;
 	
 	private IRCClient client;
+	private ConnectedUsers userList;
 	
 	// Whether or not timestamps should be displayed for messages and notifications
 	private boolean useTimestamps = true;
@@ -274,7 +276,7 @@ public class MainGUI implements ActionListener, Observer {
 		// If the connect button was pressed
 		if (source.equals(miConnect)) {
 			// Create the client and add the GUI as an observer
-			client = new IRCClient(IRCProtocol.TWITCH_HOST);
+			client = new IRCClient(IRCProtocol.TWITCH_HOST, userList);
 			client.addObserver(this);
 			
 			Thread clientThread = new Thread(client);
@@ -284,7 +286,9 @@ public class MainGUI implements ActionListener, Observer {
 		// If the login button was pressed
 		if (source.equals(miLogin)) {
 			client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
-			currentUser = new User("Kaascroissant", null);
+			userList.addUser("Kaascroissant", LOGTAB);
+			currentUser = userList.getUser("Kaascroissant");
+			
 			inputField.setEnabled(true);
 		}
 		
@@ -310,7 +314,7 @@ public class MainGUI implements ActionListener, Observer {
 				break;
 			case "MESSAGE":
 				// Received a message from the IRC client
-				append(ChatMessageBuilder.getRegularMessage(command[3], command[1], new User(command[2], null)));
+				append(ChatMessageBuilder.getRegularMessage(command[3], command[1], userList.getUser(command[2])));
 				break;
 		}
 	}
@@ -327,6 +331,7 @@ public class MainGUI implements ActionListener, Observer {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		userList = new ConnectedUsers();
 		chatPanes = new HashMap<>();
 
         try {
