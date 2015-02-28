@@ -36,7 +36,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -46,8 +45,11 @@ import utils.ChatMessageBuilder;
 import utils.ClickableListener;
 import utils.EmoticonListener;
 import utils.TextFieldKeyListener;
+import TwitchAPI.ChannelData;
+import dataobjects.Channel;
 import dataobjects.ChatMessage;
 import dataobjects.ConnectedUsers;
+import dataobjects.Emoticons;
 import dataobjects.User;
 
 /**
@@ -78,8 +80,11 @@ public class MainGUI implements ActionListener, Observer {
 	
 	private User currentUser;
 	
+	private EmoticonListener emoticonListener;
+	
 	private IRCClient client;
 	private ConnectedUsers userList;
+	private Map<String, Channel> channels;
 	
 	// Whether or not timestamps should be displayed for messages and notifications
 	private boolean useTimestamps = true;
@@ -115,7 +120,8 @@ public class MainGUI implements ActionListener, Observer {
 		chatPane.addMouseListener(new ClickableListener(chatPane));
 		
 		// Add a document listener to check for emoticons
-		chatPane.getStyledDocument().addDocumentListener(new EmoticonListener());
+		emoticonListener = new EmoticonListener(MAX_CHARS);
+		chatPane.getStyledDocument().addDocumentListener(emoticonListener);
 		
 		// Create a JScrollPane for the JTextPane
 		JScrollPane chatScrollPane = new JScrollPane();
@@ -198,16 +204,6 @@ public class MainGUI implements ActionListener, Observer {
 			e.printStackTrace();
 		}
 		
-		// Remove first line if the character limit has been reached
-		if (doc.getLength() > MAX_CHARS) {
-			Element firstLine = doc.getDefaultRootElement().getElement(0);
-			try {
-				doc.remove(firstLine.getStartOffset(), firstLine.getEndOffset());
-			} catch (BadLocationException e) {
-				e.printStackTrace();
-			}
-		}
-		
 		// Make sure the scroll bar is set to the end of the text panel
 		chatPanes.get(message.getDestination()).setCaretPosition(doc.getLength());
 	}
@@ -235,16 +231,6 @@ public class MainGUI implements ActionListener, Observer {
 			doc.insertString(doc.getLength(), notification + "\n", attributeSet);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
-		}
-		
-		// Remove first line if the character limit has been reached
-		if (doc.getLength() > MAX_CHARS) {
-			Element firstLine = doc.getDefaultRootElement().getElement(0);
-			try {
-				doc.remove(firstLine.getStartOffset(), firstLine.getEndOffset());
-			} catch (BadLocationException e) {
-				e.printStackTrace();
-			}
 		}
 		
 		// Make sure the scroll bar is set to the end of the text panel
@@ -305,6 +291,16 @@ public class MainGUI implements ActionListener, Observer {
 			String channel = (String) JOptionPane.showInputDialog(frame, "Enter the channel you wish to join:\n", "Join a channel", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			client.sendMessage("JOIN #" + channel + "\r\n");
 			newTab(channel);
+			
+			// Get a channel object via the twitch api and add it to the channel list
+			Channel channelObject = ChannelData.getChannel(channel);
+			channels.put(channel, channelObject);
+			
+			// Add the channel's emoticons to the emoticon listener
+			for (Emoticons emoticon : channelObject.getEmoticons().getEmoticonsList()) {
+				emoticonListener.addEmoticon(emoticon.getRegex(), emoticon.getUrl());
+			}
+			
 			notify("You have joined the channel " + channel + ".", LOGTAB);
 		}
 		
@@ -317,6 +313,7 @@ public class MainGUI implements ActionListener, Observer {
 			if (!channel.equals(LOGTAB)) {
 				client.sendMessage("PART #" + channel + "\n\r");
 				this.tabPanel.removeTabAt(tabPanel.getSelectedIndex());
+				channels.remove(channel);
 				
 				notify("You have left the channel " + channel + ".", LOGTAB);
 			}
@@ -359,6 +356,7 @@ public class MainGUI implements ActionListener, Observer {
 	private void initialize() {
 		userList = new ConnectedUsers();
 		chatPanes = new HashMap<>();
+		channels = new HashMap<>();
 
         try {
         	// Try to get the system's look and feel

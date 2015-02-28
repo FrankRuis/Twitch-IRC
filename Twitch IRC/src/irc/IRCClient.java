@@ -37,7 +37,7 @@ public class IRCClient extends Observable implements Runnable {
 	private boolean run;
 	
 	// Whether or not logging should be enabled
-	private boolean loggingEnabled = false;
+	private boolean loggingEnabled = true;
 	
 	private ConnectedUsers userList;
 
@@ -184,7 +184,7 @@ public class IRCClient extends Observable implements Runnable {
 								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.EMOTESET)) {
 									// TODO emoteset
 								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.SPECIALUSER)) {
-									// TODO specialuser
+									userList.getUser(twitchCommand[1]).addRole(twitchCommand[2], channel);
 								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.HISTORYEND)) {
 									// TODO historyend
 								} else if (twitchCommand[0].substring(1).equals(IRCProtocol.CLEAR)) {

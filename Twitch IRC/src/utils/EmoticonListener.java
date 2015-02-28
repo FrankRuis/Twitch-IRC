@@ -1,13 +1,17 @@
 package utils;
 
 import java.awt.EventQueue;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -18,19 +22,36 @@ import javax.swing.text.StyledDocument;
  * @author Frank
  */
 public class EmoticonListener implements DocumentListener {
-
+	
+	// Maximum amount of characters to display in a single JTextPane
+	private final int MAX_CHARS;
+	
+	// Map containing the emoticons mapped to their regex
 	private Map<String, ImageIcon> regexMap;
 	
 	/**
 	 * Constructor
 	 */
-	public EmoticonListener() {
+	public EmoticonListener(int MAX_CHARS) {
 		regexMap = new HashMap<>();
-		
-		// Add emoticons and their regexes to the regexMap
-		//regexMap.put(":D", new ImageIcon(ImageIO.read(new File("Images/SmileyD.png"))));
+		this.MAX_CHARS = MAX_CHARS;
 	}
 
+	/**
+	 * Add an emoticon to the listener
+	 * @param regex The regex for the emoticon
+	 * @param url The url to the image
+	 */
+	public void addEmoticon(String regex, String url) {
+		try {
+			if (!regexMap.containsKey(regex)) {
+				regexMap.put(regex, new ImageIcon(ImageIO.read(new URL(url))));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void changedUpdate(DocumentEvent e) {	
 	}
@@ -52,36 +73,48 @@ public class EmoticonListener implements DocumentListener {
 				try {
 					insertion = doc.getText(e.getOffset(), e.getLength());
 				} catch (BadLocationException ex) {
-					
+					ex.printStackTrace();
 				}
 				
 				// Go through all possible emoticons
-				for (String regex : regexMap.keySet()) {
-					// The index of the emoticon in the insertion
-					int i = insertion.indexOf(regex);
-					
-					try {
-						// If the text contained the regex of the emoticon
-						while (i >= 0) {
-							// Make an attributeset with the attributes of the regex
-							SimpleAttributeSet attributeSet = new SimpleAttributeSet(doc.getCharacterElement(e.getOffset() + i).getAttributes());
-							
-							// Check if there is no icon yet
-							if (StyleConstants.getIcon(attributeSet) == null) {
-			
-								// Set the icon to the corresponding regex
-								StyleConstants.setIcon(attributeSet, regexMap.get(regex));
-			
-								// Remove the regex string and insert the icon
-								doc.remove(e.getOffset() + i, regex.length());
-								doc.insertString(e.getOffset() + i, regex, attributeSet);
-							}
-							
-							// Set i to the index of the next occurrence of the regex
-							i = insertion.indexOf(regex, i + regex.length());
-						}
-					} catch (BadLocationException ex) {
+				if (insertion != null) {
+					for (String regex : regexMap.keySet()) {
+						// The index of the emoticon in the insertion
+						int i = insertion.indexOf(regex);
 						
+						try {
+							// If the text contained the regex of the emoticon
+							while (i >= 0) {
+								// Make an attributeset with the attributes of the regex
+								SimpleAttributeSet attributeSet = new SimpleAttributeSet(doc.getCharacterElement(e.getOffset() + i).getAttributes());
+								
+								// Check if there is no icon yet
+								if (StyleConstants.getIcon(attributeSet) == null) {
+				
+									// Set the icon to the corresponding regex
+									StyleConstants.setIcon(attributeSet, regexMap.get(regex));
+				
+									// Remove the regex string and insert the icon
+									doc.remove(e.getOffset() + i, regex.length());
+									doc.insertString(e.getOffset() + i, regex, attributeSet);
+								}
+								
+								// Set i to the index of the next occurrence of the regex
+								i = insertion.indexOf(regex, i + regex.length());
+							}
+						} catch (BadLocationException ex) {
+							
+						}
+					}
+				}
+				
+				// Remove first line if the character limit has been reached
+				if (doc.getLength() > MAX_CHARS) {
+					Element firstLine = doc.getDefaultRootElement().getElement(0);
+					try {
+						doc.remove(firstLine.getStartOffset(), firstLine.getEndOffset());
+					} catch (BadLocationException ex) {
+						ex.printStackTrace();
 					}
 				}
 			}
