@@ -156,4 +156,13 @@ public class User {
 			return false;
 		}
 	}
+	
+	/**
+	 * Return the roles the user has in the given channel
+	 * @param channel The channel
+	 * @return A set containing the user's roles
+	 */
+	public Set<String> getRoles(String channel) {
+		return this.specialRoles.get(channel) != null ? this.specialRoles.get(channel) : new HashSet<String>();
+	}
 }

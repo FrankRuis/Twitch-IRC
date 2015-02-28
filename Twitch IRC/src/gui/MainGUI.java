@@ -168,6 +168,37 @@ public class MainGUI implements ActionListener, Observer {
 	}
 	
 	/**
+	 * Get the badge for the given role from the given channel
+	 * @param role The role
+	 * @param channel The channel
+	 * @return An attributeset containing the badge
+	 */
+	public SimpleAttributeSet getBadge(String role, String channel) {
+		SimpleAttributeSet attributeSet = new SimpleAttributeSet();
+		if (channels.containsKey(channel)) {
+			switch (role) {
+			case "subscriber":
+				StyleConstants.setIcon(attributeSet, channels.get(channel).getSubscriberBadge());
+				break;
+			case "turbo":
+				StyleConstants.setIcon(attributeSet, channels.get(channel).getTurboBadge());
+				break;
+			case "mod":
+				StyleConstants.setIcon(attributeSet, channels.get(channel).getModBadge());
+				break;
+			case "broadcaster":
+				StyleConstants.setIcon(attributeSet, channels.get(channel).getBroadcasterBadge());
+				break;
+			case "admin":
+				StyleConstants.setIcon(attributeSet, channels.get(channel).getAdminBadge());
+				break;
+			}
+		}
+		
+		return attributeSet;
+	}
+	
+	/**
 	 * Append a message to a chat pane
 	 * @param message A ChatMessage object
 	 */
@@ -195,7 +226,14 @@ public class MainGUI implements ActionListener, Observer {
 			String name = message.getUser().getName().substring(0, 1).toUpperCase() + message.getUser().getName().substring(1);
 			
 			if (useTimestamps) doc.insertString(doc.getLength(), time  + " ", timeAset);
-			doc.insertString(doc.getLength(), name  + ": ", unameAset);
+			
+			// Add a badge for each role this user has
+			for (String role : message.getUser().getRoles(message.getDestination())) {
+				doc.insertString(doc.getLength(), role, getBadge(role, message.getDestination()));
+				doc.insertString(doc.getLength()," ", unameAset);
+			}
+			
+			doc.insertString(doc.getLength(),name  + ": ", unameAset);
 			doc.insertString(doc.getLength(), message.getMessage()  + "\n", attributeSet);
 			
 			emoticonInserter.insertEmoticons(doc, message.getMessage().length() + 1);
@@ -339,7 +377,6 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// If the leave menu item was pressed
 		if (source.equals(miLeaveChannel)) {
-			// TODO proper leaving of a channel
 			String channel = getActiveTab();
 			
 			// Don't leave the log channel
@@ -377,10 +414,12 @@ public class MainGUI implements ActionListener, Observer {
 				break;
 			case "MESSAGE":
 				// Received a message from the IRC client
-				if (command[3].startsWith(IRCProtocol.ACTION)) {
-					append(ChatMessageBuilder.getActionMessage(command[3].substring(IRCProtocol.ACTION.length()), command[1], userList.getUser(command[2])));
-				} else {
-					append(ChatMessageBuilder.getRegularMessage(command[3], command[1], userList.getUser(command[2])));
+				if (channels.containsKey(command[1])) {
+					if (command[3].startsWith(IRCProtocol.ACTION)) {
+						append(ChatMessageBuilder.getActionMessage(command[3].substring(IRCProtocol.ACTION.length()), command[1], userList.getUser(command[2])));
+					} else {
+						append(ChatMessageBuilder.getRegularMessage(command[3], command[1], userList.getUser(command[2])));
+					}
 				}
 				break;
 		}

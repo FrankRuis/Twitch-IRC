@@ -143,7 +143,7 @@ public class IRCClient extends Observable implements Runnable {
 						case IRCProtocol.MOTD_END:
 							// Message of the day end received, login was successful
 							setChanged();
-							notifyObservers("NOTIFY Log * You have logged in successfully.");
+							notifyObservers("NOTIFY Log * You have successfully logged in.");
 							break;
 						case IRCProtocol.MOTD:
 							// Show the message of the day in the GUI
@@ -151,7 +151,9 @@ public class IRCClient extends Observable implements Runnable {
 							notifyObservers("NOTIFY Log * The message of the day is: " + message[3].substring(1));
 							break;
 						case IRCProtocol.MODERATOR:
-							// TODO moderator command
+							// Add the moderator to the user list and set their role as mod
+							userList.addUser(message[3].substring(3), message[2].substring(1));
+							userList.getUser(message[3].substring(3)).addRole("mod", message[2].substring(1));
 							break;
 						case IRCProtocol.PART:
 							// User has left the channel, remove the channel from the user's connected channels

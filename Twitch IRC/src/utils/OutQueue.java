@@ -61,6 +61,7 @@ public class OutQueue implements Runnable {
 					buffer.add(System.currentTimeMillis());
 				} catch (IOException e) {
 					e.printStackTrace();
+					run = false;
 				}
 				
 			// If there is a message in the queue and the buffer has reached its maximum size
@@ -80,6 +81,7 @@ public class OutQueue implements Runnable {
 						buffer.add(System.currentTimeMillis());
 					} catch (IOException e) {
 						e.printStackTrace();
+						run = false;
 					}
 				}
 			}
