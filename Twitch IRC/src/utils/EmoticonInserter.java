@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -58,33 +59,34 @@ public class EmoticonInserter {
 		
 		// Go through all possible emoticons
 		if (insertion != null) {
-			for (String regex : regexMap.keySet()) {
-				// The index of the emoticon in the insertion
-				int i = insertion.indexOf(regex);
-				
-				try {
-					// If the text contained the regex of the emoticon
-					while (i >= 0) {
-						// Make an attributeset with the attributes of the regex
-						SimpleAttributeSet attributeSet = new SimpleAttributeSet(doc.getCharacterElement(offset + i).getAttributes());
-						
-						// Check if there is no icon yet
-						if (StyleConstants.getIcon(attributeSet) == null) {
-		
-							// Set the icon to the corresponding regex
-							StyleConstants.setIcon(attributeSet, regexMap.get(regex));
-		
-							// Remove the regex string and insert the icon
-							doc.remove(offset + i, regex.length());
-							doc.insertString(offset + i, regex, attributeSet);
+			try {
+				Set<String> regexes = regexMap.keySet();
+				for (String regex : regexes) {
+					// The index of the emoticon in the insertion
+					int i = insertion.indexOf(regex);
+					
+						// If the text contained the regex of the emoticon
+						while (i >= 0) {
+							// Make an attributeset with the attributes of the regex
+							SimpleAttributeSet attributeSet = new SimpleAttributeSet(doc.getCharacterElement(offset + i).getAttributes());
+							
+							// Check if there is no icon yet
+							if (StyleConstants.getIcon(attributeSet) == null) {
+			
+								// Set the icon to the corresponding regex
+								StyleConstants.setIcon(attributeSet, regexMap.get(regex));
+			
+								// Remove the regex string and insert the icon
+								doc.remove(offset + i, regex.length());
+								doc.insertString(offset + i, regex, attributeSet);
+							}
+							
+							// Set i to the index of the next occurrence of the regex
+							i = insertion.indexOf(regex, i + regex.length());
 						}
-						
-						// Set i to the index of the next occurrence of the regex
-						i = insertion.indexOf(regex, i + regex.length());
-					}
-				} catch (BadLocationException | ConcurrentModificationException ex) {
-					ex.printStackTrace();
 				}
+			} catch (BadLocationException | ConcurrentModificationException ex) {
+				ex.printStackTrace();
 			}
 		}
 	}
