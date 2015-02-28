@@ -71,6 +71,7 @@ public class MainGUI implements ActionListener, Observer {
 	private JMenuItem miConnect;
 	private JMenuItem miLogin;
 	private JMenuItem miJoinChannel;
+	private JMenuItem miLeaveChannel;
 	
 	private JTextField inputField;
 	
@@ -125,6 +126,8 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// Add the JScrollPane to a new tab
 		tabPanel.addTab(name, null, chatScrollPane, null);
+		
+		tabPanel.setSelectedIndex(tabPanel.getTabCount() - 1);
 	}
 	
 	/**
@@ -183,8 +186,11 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// Insert the chat message into the document
 		try {
+			// Capitalize the first letter of the username
+			String name = message.getUser().getName().substring(0, 1).toUpperCase() + message.getUser().getName().substring(1);
+			
 			if (useTimestamps) doc.insertString(doc.getLength(), time  + " ", timeAset);
-			doc.insertString(doc.getLength(), message.getUser().getName()  + ": ", unameAset);
+			doc.insertString(doc.getLength(), name  + ": ", unameAset);
 			doc.insertString(doc.getLength(), message.getMessage()  + "\n", attributeSet);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
@@ -273,7 +279,7 @@ public class MainGUI implements ActionListener, Observer {
 		// Save which button called the event
 		Object source = e.getSource();
 		
-		// If the connect button was pressed
+		// If the connect menu item was pressed
 		if (source.equals(miConnect)) {
 			// Create the client and add the GUI as an observer
 			client = new IRCClient(IRCProtocol.TWITCH_HOST, userList);
@@ -283,7 +289,7 @@ public class MainGUI implements ActionListener, Observer {
 			clientThread.start();
 		}
 		
-		// If the login button was pressed
+		// If the login menu item was pressed
 		if (source.equals(miLogin)) {
 			client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
 			userList.addUser("Kaascroissant", LOGTAB);
@@ -292,12 +298,26 @@ public class MainGUI implements ActionListener, Observer {
 			inputField.setEnabled(true);
 		}
 		
-		// If the login button was pressed
+		// If the join menu item was pressed
 		if (source.equals(miJoinChannel)) {
 			String channel = (String) JOptionPane.showInputDialog(frame, "Enter the channel you wish to join:\n", "Join a channel", JOptionPane.PLAIN_MESSAGE, null, null, "");
 			client.sendMessage("JOIN #" + channel + "\r\n");
 			newTab(channel);
 			notify("You have joined the channel " + channel + ".", LOGTAB);
+		}
+		
+		// If the leave menu item was pressed
+		if (source.equals(miLeaveChannel)) {
+			// TODO proper leaving of a channel
+			String channel = getActiveTab();
+			
+			// Don't leave the log channel
+			if (!channel.equals(LOGTAB)) {
+				client.sendMessage("PART #" + channel + "\n\r");
+				this.tabPanel.removeTabAt(tabPanel.getSelectedIndex());
+				
+				notify("You have left the channel " + channel + ".", LOGTAB);
+			}
 		}
 	}
 	
@@ -384,10 +404,13 @@ public class MainGUI implements ActionListener, Observer {
 		miLogin.addActionListener(this);
 		miJoinChannel = new JMenuItem("Join channel");
 		miJoinChannel.addActionListener(this);
+		miLeaveChannel = new JMenuItem("Leave channel");
+		miLeaveChannel.addActionListener(this);
 		
 		mActions.add(miConnect);
 		mActions.add(miLogin);
 		mActions.add(miJoinChannel);
+		mActions.add(miLeaveChannel);
 		
 		menuBar.add(mActions);
 		frame.setJMenuBar(menuBar);

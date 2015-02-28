@@ -126,6 +126,7 @@ public class IRCClient extends Observable implements Runnable {
 				while ((line = in.readLine()) != null) {
 					// Split the message on up to 4 whitespaces
 					String[] message = line.split("\\s", 4);
+					log(line);
 					
 					// If we received a ping, reply with a pong
 					if (message[0].equals(IRCProtocol.PING)) {
@@ -144,6 +145,17 @@ public class IRCClient extends Observable implements Runnable {
 							setChanged();
 							notifyObservers("NOTIFY Log * The message of the day is: " + message[3].substring(1));
 							break;
+						case IRCProtocol.MODERATOR:
+							// TODO moderator command
+							break;
+						case IRCProtocol.PART:
+							// User has left the channel, remove the channel from the user's connected channels
+							userList.removeChannel(parseUserName(message[0]), message[2].substring(1));
+							break;
+						case IRCProtocol.JOIN:
+							// User has joined a channel, add the channel to the user's connected channels
+							userList.addChannel(parseUserName(message[0]), message[2].substring(1));
+							break;
 						case IRCProtocol.MESSAGE:
 							// We received a message
 							String username = parseUserName(message[0]);
@@ -160,20 +172,34 @@ public class IRCClient extends Observable implements Runnable {
 								setChanged();
 								notifyObservers("MESSAGE " + channel + " " + username + " " + messageContents);
 							
-							// If the user is jtv, parse the user information
+							// If the user is jtv, parse the command information
 							} else {
 								String[] userInfo = message[3].split("\\s", 3);
-								userList.addUser(userInfo[1], channel);
+								if (userInfo.length > 1) {
+									userList.addUser(userInfo[1], channel);
+								}
 								
-								// Check the type of user information
+								// Check the type of information
 								if (userInfo[0].substring(1).equals(IRCProtocol.USERCOLOR)) {
 									userList.setUserColor(userInfo[1], userInfo[2]);
+								} else if (userInfo[0].substring(1).equals(IRCProtocol.EMOTESET)) {
+									// TODO emoteset
+								} else if (userInfo[0].substring(1).equals(IRCProtocol.SPECIALUSER)) {
+									// TODO specialuser
+								} else if (userInfo[0].substring(1).equals(IRCProtocol.HISTORYEND)) {
+									// TODO historyend
+								} else if (userInfo[0].substring(1).equals(IRCProtocol.CLEAR)) {
+									// Notify the GUI that the chat has been cleared
+									setChanged();
+									notifyObservers("NOTIFY " + channel + " * Chat was cleared by a moderator.");
+								} else {
+									// Not one of the commands, send the text as a notification
+									setChanged();
+									notifyObservers("NOTIFY " + channel + " * " + messageContents);
 								}
 							}
 							break;
 					}
-					
-					log(line);
 				}
 			} catch (IOException e) {
 				log("Error: IOException");

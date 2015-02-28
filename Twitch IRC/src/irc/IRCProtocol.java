@@ -68,7 +68,42 @@ public class IRCProtocol {
 	public static final String MESSAGE = "PRIVMSG";
 	
 	/**
+	 * JOIN command, sent when a user joins the channel
+	 */
+	public static final String JOIN = "JOIN";
+	
+	/**
+	 * PART command, sent when a user leaves a channel
+	 */
+	public static final String PART = "PART";
+	
+	/**
+	 * MODE command showing which users are moderators in the channel
+	 */
+	public static final String MODERATOR = "MODE";
+	
+	/**
 	 * USERCOLOR command for specifying the color of a username
 	 */
 	public static final String USERCOLOR = "USERCOLOR";
+	
+	/**
+	 * EMOTESET command for specifying the emote sets the user may use
+	 */
+	public static final String EMOTESET = "EMOTESET";
+	
+	/**
+	 * SPECIALUSER command for specifying the special user type
+	 */
+	public static final String SPECIALUSER = "SPECIALUSER";
+	
+	/**
+	 * CLEARCHAT command, sent when a moderator has cleared the chat
+	 */
+	public static final String CLEAR = "CLEARCHAT";
+	
+	/**
+	 * HISTORYEND command
+	 */
+	public static final String HISTORYEND = "HISTORYEND";
 }
