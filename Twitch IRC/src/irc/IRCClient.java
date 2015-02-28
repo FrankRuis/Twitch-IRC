@@ -22,7 +22,7 @@ import utils.OutQueue;
  * @author Frank
  */
 public class IRCClient extends Observable implements Runnable {
-
+	
 	private String host;
 	private int port;
 	
@@ -39,7 +39,7 @@ public class IRCClient extends Observable implements Runnable {
 	private boolean connected;
 	
 	// Whether or not logging should be enabled
-	private boolean loggingEnabled = false;
+	private boolean loggingEnabled = true;
 	
 	private ConnectedUsers userList;
 
@@ -65,7 +65,7 @@ public class IRCClient extends Observable implements Runnable {
 			this.in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
 			
 			// Create a queue for the outgoing messages
-			outQueue = new OutQueue(out);
+			outQueue = new OutQueue(out, 20, 30000);
 			Thread queueThread = new Thread(outQueue);
 			queueThread.start();
 			
@@ -80,12 +80,12 @@ public class IRCClient extends Observable implements Runnable {
 		} catch (UnknownHostException e) {
 			// Notify the GUI
 			setChanged();
-			notifyObservers("NOTIFY Log * Could not recognize the host " + host);
+			notifyObservers("DISCONNECTED Log * Could not recognize the host " + host);
 			log("Error: Unknown Host.");
 		} catch (IOException e) {
 			// Notify the GUI
 			setChanged();
-			notifyObservers("NOTIFY Log * Error while connecting to " + host);
+			notifyObservers("DISCONNECTED Log * Error while connecting to " + host);
 			log("Error: IOException while connecting.");
 		}
 	}
@@ -124,7 +124,7 @@ public class IRCClient extends Observable implements Runnable {
 	public void run() {	
 		this.connect();
 		
-		// Keep running if run is set to true
+		// Keep running if connected is set to true
 		while (connected) {
 			try {
 				String line = null;
@@ -218,7 +218,10 @@ public class IRCClient extends Observable implements Runnable {
 					}
 				}
 			} catch (IOException e) {
+				setChanged();
+				notifyObservers("DISCONNECTED Log * There was a problem with the connection, server disconnected.");
 				log("Error: IOException");
+				connected = false;
 			}
 		}
 		

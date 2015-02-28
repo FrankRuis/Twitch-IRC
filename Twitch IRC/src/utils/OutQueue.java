@@ -13,10 +13,10 @@ import java.util.List;
 public class OutQueue implements Runnable {
 
 	// The maximum amount of messages in the buffer
-	public static final int MAX_BUFFERSIZE = 20;
+	public final int MAX_BUFFERSIZE;
 	
 	// The time in milliseconds for which the message limit counts
-	public static final int MAX_TIME = 30000;
+	public final int MAX_TIME;
 	
 	// The buffer
 	private List<Long> buffer = new LinkedList<>();
@@ -31,9 +31,15 @@ public class OutQueue implements Runnable {
 
 	/**
 	 * Constructor
+	 * @param out The output stream
+	 * @param size The buffer size
+	 * @param time The time for which the limit counts in milliseconds
 	 */
-	public OutQueue(BufferedWriter out) {
+	public OutQueue(BufferedWriter out, int size, int time) {
 		this.out = out;
+		this.MAX_BUFFERSIZE = size;
+		this.MAX_TIME = time;
+		
 		run = true;
 	}
 	

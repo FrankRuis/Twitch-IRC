@@ -315,21 +315,26 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// If the join menu item was pressed
 		if (source.equals(miJoinChannel)) {
-			String channel = (String) JOptionPane.showInputDialog(frame, "Enter the channel you wish to join:\n", "Join a channel", JOptionPane.PLAIN_MESSAGE, null, null, "");
-			channel = channel.toLowerCase();
-			client.sendMessage("JOIN #" + channel + "\r\n");
-			newTab(channel);
-			
-			// Get a channel object via the twitch api and add it to the channel list
-			Channel channelObject = ChannelData.getChannel(channel);
-			channels.put(channel, channelObject);
-			
-			// Add the channel's emoticons to the emoticon listener
-			for (Emoticons emoticon : channelObject.getEmoticons().getEmoticonsList()) {
-				emoticonInserter.addEmoticon(emoticon.getRegex(), emoticon.getUrl());
+			if (client != null && client.isLoggedIn()) {
+				String channel = (String) JOptionPane.showInputDialog(frame, "Enter the channel you wish to join:\n", "Join a channel", JOptionPane.PLAIN_MESSAGE, null, null, "");
+				
+				if (channel != null) {
+					channel = channel.toLowerCase();
+					client.sendMessage("JOIN #" + channel + "\r\n");
+					newTab(channel);
+					
+					// Get a channel object via the twitch api and add it to the channel list
+					Channel channelObject = ChannelData.getChannel(channel);
+					channels.put(channel, channelObject);
+					
+					// Add the channel's emoticons to the emoticon listener
+					for (Emoticons emoticon : channelObject.getEmoticons().getEmoticonsList()) {
+						emoticonInserter.addEmoticon(emoticon.getRegex(), emoticon.getUrl());
+					}
+					
+					notify("You have joined the channel " + channel + ".", LOGTAB);
+				}
 			}
-			
-			notify("You have joined the channel " + channel + ".", LOGTAB);
 		}
 		
 		// If the leave menu item was pressed
@@ -357,6 +362,17 @@ public class MainGUI implements ActionListener, Observer {
 		switch (command[0]) {
 			case "NOTIFY":
 				// Received a notification from the IRC client
+				notify(command[3], command[1]);
+				break;
+			case "DISCONNECTED":
+				// The client has disconnected
+				client = null;
+				
+				// Remove the all tabs except for the log tab
+				for (int i = 1; i < tabPanel.getTabCount(); i++) {
+					tabPanel.removeTabAt(i);
+				}
+				
 				notify(command[3], command[1]);
 				break;
 			case "MESSAGE":
