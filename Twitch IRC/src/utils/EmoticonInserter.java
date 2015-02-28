@@ -2,6 +2,7 @@ package utils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,11 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+/**
+ * Class for inserting emoticons in a document
+ * 
+ * @author Frank
+ */
 public class EmoticonInserter {
 
 	// Map containing the emoticons mapped to their regex
@@ -76,7 +82,7 @@ public class EmoticonInserter {
 						// Set i to the index of the next occurrence of the regex
 						i = insertion.indexOf(regex, i + regex.length());
 					}
-				} catch (BadLocationException ex) {
+				} catch (BadLocationException | ConcurrentModificationException ex) {
 					ex.printStackTrace();
 				}
 			}

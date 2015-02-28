@@ -198,7 +198,7 @@ public class MainGUI implements ActionListener, Observer {
 			doc.insertString(doc.getLength(), name  + ": ", unameAset);
 			doc.insertString(doc.getLength(), message.getMessage()  + "\n", attributeSet);
 			
-			emoticonInserter.insertEmoticons(doc, message.getMessage().length());
+			emoticonInserter.insertEmoticons(doc, message.getMessage().length() + 1);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -308,6 +308,7 @@ public class MainGUI implements ActionListener, Observer {
 		// If the join menu item was pressed
 		if (source.equals(miJoinChannel)) {
 			String channel = (String) JOptionPane.showInputDialog(frame, "Enter the channel you wish to join:\n", "Join a channel", JOptionPane.PLAIN_MESSAGE, null, null, "");
+			channel = channel.toLowerCase();
 			client.sendMessage("JOIN #" + channel + "\r\n");
 			newTab(channel);
 			
