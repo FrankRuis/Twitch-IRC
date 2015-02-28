@@ -37,7 +37,7 @@ public class IRCClient extends Observable implements Runnable {
 	private boolean run;
 	
 	// Whether or not logging should be enabled
-	private boolean loggingEnabled = true;
+	private boolean loggingEnabled = false;
 	
 	private ConnectedUsers userList;
 

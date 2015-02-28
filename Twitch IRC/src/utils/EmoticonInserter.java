@@ -6,6 +6,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -62,8 +64,18 @@ public class EmoticonInserter {
 			try {
 				Set<String> regexes = regexMap.keySet();
 				for (String regex : regexes) {
-					// The index of the emoticon in the insertion
-					int i = insertion.indexOf(regex);
+					// Get the index of the emoticon in the insertion
+					Pattern pattern = Pattern.compile(regex);
+					Matcher matcher = pattern.matcher(insertion);
+					
+					int i = -1;
+					if (matcher.find()) {
+						try {
+							i = matcher.start();
+						} catch (IllegalStateException e) {
+							
+						}
+					}
 					
 						// If the text contained the regex of the emoticon
 						while (i >= 0) {
@@ -77,8 +89,8 @@ public class EmoticonInserter {
 								StyleConstants.setIcon(attributeSet, regexMap.get(regex));
 			
 								// Remove the regex string and insert the icon
-								doc.remove(offset + i, regex.length());
-								doc.insertString(offset + i, regex, attributeSet);
+								doc.remove(offset + i, matcher.group().length());
+								doc.insertString(offset + i, matcher.group(), attributeSet);
 							}
 							
 							// Set i to the index of the next occurrence of the regex
