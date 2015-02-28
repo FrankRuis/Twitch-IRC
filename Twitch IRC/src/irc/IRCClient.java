@@ -30,11 +30,13 @@ public class IRCClient extends Observable implements Runnable {
 	private BufferedWriter out;
 	private BufferedReader in;
 	
+	private boolean loggedIn;
+	
 	// Message queue to ensure we don't exceed the server's message limit
 	private OutQueue outQueue;
 	
 	// Whether or not the client should keep running
-	private boolean run;
+	private boolean connected;
 	
 	// Whether or not logging should be enabled
 	private boolean loggingEnabled = false;
@@ -49,6 +51,7 @@ public class IRCClient extends Observable implements Runnable {
 		this.host = host;
 		this.port = IRCProtocol.PORT;
 		this.userList = userList;
+		this.loggedIn = false;
 	}
 	
 	/**
@@ -67,7 +70,7 @@ public class IRCClient extends Observable implements Runnable {
 			queueThread.start();
 			
 			// Allow the loop to start
-			run = true;
+			connected = true;
 			
 			// Notify the GUI
 			setChanged();
@@ -95,6 +98,8 @@ public class IRCClient extends Observable implements Runnable {
 		this.sendMessage(IRCProtocol.NICKNAME + " " + nickname + "\r\n");
 		this.sendMessage(IRCProtocol.USER + " " + nickname + " 0 * :" + nickname + "\r\n");
 		this.sendMessage(IRCProtocol.TWITCHCLIENT + "\r\n");
+		
+		loggedIn = true;
 	}
 	
 	/**
@@ -120,7 +125,7 @@ public class IRCClient extends Observable implements Runnable {
 		this.connect();
 		
 		// Keep running if run is set to true
-		while (run) {
+		while (connected) {
 			try {
 				String line = null;
 				while ((line = in.readLine()) != null) {
@@ -253,5 +258,19 @@ public class IRCClient extends Observable implements Runnable {
 			
 			System.out.println(time + " " + message);
 		}
+	}
+	
+	/**
+	 * @return Whether or not the client is logged in
+	 */
+	public boolean isLoggedIn() {
+		return loggedIn;
+	}
+	
+	/**
+	 * @return Whether or not the client is connected
+	 */
+	public boolean isConnected() {
+		return connected;
 	}
 }

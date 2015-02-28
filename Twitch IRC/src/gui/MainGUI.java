@@ -288,21 +288,29 @@ public class MainGUI implements ActionListener, Observer {
 		
 		// If the connect menu item was pressed
 		if (source.equals(miConnect)) {
-			// Create the client and add the GUI as an observer
-			client = new IRCClient(IRCProtocol.TWITCH_HOST, userList);
-			client.addObserver(this);
-			
-			Thread clientThread = new Thread(client);
-			clientThread.start();
+			if (client == null) {
+				// Create the client and add the GUI as an observer
+				client = new IRCClient(IRCProtocol.TWITCH_HOST, userList);
+				client.addObserver(this);
+				
+				Thread clientThread = new Thread(client);
+				clientThread.start();
+			} else {
+				notify("You are already connected.", LOGTAB);
+			}
 		}
 		
 		// If the login menu item was pressed
 		if (source.equals(miLogin)) {
-			client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
-			userList.addUser("Kaascroissant", LOGTAB);
-			currentUser = userList.getUser("Kaascroissant");
-			
-			inputField.setEnabled(true);
+			if (client != null && client.isConnected() && !client.isLoggedIn()) {
+				client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
+				userList.addUser("Kaascroissant", LOGTAB);
+				currentUser = userList.getUser("Kaascroissant");
+				
+				inputField.setEnabled(true);
+			} else {
+				notify("The client is not connected or you are already logged in.", LOGTAB);
+			}
 		}
 		
 		// If the join menu item was pressed

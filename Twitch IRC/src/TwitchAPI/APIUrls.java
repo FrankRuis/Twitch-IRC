@@ -24,4 +24,8 @@ public class APIUrls {
 	 */
 	public static String BADGES = "/chat/CHANNEL/badges";
 	
+	/**
+	 * The url to all emoticons with the set they belong to
+	 */
+	public static String EMOTESETS = "/chat/emoticons";
 }
