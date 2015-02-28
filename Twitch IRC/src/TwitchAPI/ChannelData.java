@@ -19,7 +19,7 @@ import dataobjects.EmoticonContainer;
  * 
  * @author Frank
  */
-public class GetChannelData {
+public class ChannelData {
 	
 	/**
 	 * Get the emoticons that can be used in the given channel
@@ -100,14 +100,9 @@ public class GetChannelData {
 	 */
 	public static Channel getChannel(String name) {
 		Channel channel = new Channel(name);
-		channel.setBadges(GetChannelData.getBadges(name));
-		channel.setEmoticons(GetChannelData.getEmoticons(name));
+		channel.setBadges(ChannelData.getBadges(name));
+		channel.setEmoticons(ChannelData.getEmoticons(name));
 		
 		return channel;
-	}
-	
-	public static void main(String[] args) {
-		Channel channel = GetChannelData.getChannel("massansc");
-		System.out.println(channel.getBadges().getSubscriber().getImage());
 	}
 }
