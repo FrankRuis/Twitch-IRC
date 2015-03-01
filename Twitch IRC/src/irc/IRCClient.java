@@ -163,6 +163,10 @@ public class IRCClient extends Observable implements Runnable {
 							// User has joined a channel, add the channel to the user's connected channels
 							userList.addChannel(parseUserName(message[0]), message[2].substring(1));
 							break;
+						case IRCProtocol.NOTICE:
+							setChanged();
+							notifyObservers("DISCONNECTED Log * " + message[3].substring(1) + ".");
+							break;
 						case IRCProtocol.MESSAGE:
 							// We received a message
 							String username = parseUserName(message[0]);

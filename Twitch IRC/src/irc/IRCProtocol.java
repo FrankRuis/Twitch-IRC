@@ -126,4 +126,9 @@ public class IRCProtocol {
 	 * The IRC account for sending user information and channel status messages
 	 */
 	public static final String JTV = "jtv";
+	
+	/**
+	 * NOTICE command
+	 */
+	public static final String NOTICE = "NOTICE";
 }
