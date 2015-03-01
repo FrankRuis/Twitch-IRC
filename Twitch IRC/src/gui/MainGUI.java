@@ -105,6 +105,14 @@ public class MainGUI implements ActionListener, Observer {
 			}
 		});
 	}
+	
+	/**
+	 * Create the application.
+	 */
+	public MainGUI() {
+		// Initialize the GUI
+		initialize();
+	}
 
 	/**
 	 * Add a new tab to the JTabbedPane
@@ -341,9 +349,7 @@ public class MainGUI implements ActionListener, Observer {
 		// If the login menu item was pressed
 		if (source.equals(miLogin)) {
 			if (client != null && client.isConnected() && !client.isLoggedIn()) {
-				client.login("kaascroissant", "oauth:k0mfjy2r9gi5hegiljd32s5g9l3g9uh");
-				userList.addUser("Kaascroissant", LOGTAB);
-				currentUser = userList.getUser("Kaascroissant");
+				new LoginScreen(client, this);
 				
 				inputField.setEnabled(true);
 			} else {
@@ -384,10 +390,25 @@ public class MainGUI implements ActionListener, Observer {
 				client.sendMessage("PART #" + channel + "\n\r");
 				this.tabPanel.removeTabAt(tabPanel.getSelectedIndex());
 				channels.remove(channel);
-				
+
 				notify("You have left the channel " + channel + ".", LOGTAB);
 			}
 		}
+	}
+	
+	/**
+	 * Set the currently logged in user
+	 * @param u The user to set
+	 */
+	public void setCurrentUser(User u) {
+		this.currentUser = u;
+	}
+	
+	/**
+	 * @return An object containing a list of connected users
+	 */
+	public ConnectedUsers getUserList() {
+		return this.userList;
 	}
 	
 	@Override
@@ -423,14 +444,6 @@ public class MainGUI implements ActionListener, Observer {
 				}
 				break;
 		}
-	}
-	
-	/**
-	 * Create the application.
-	 */
-	public MainGUI() {
-		// Initialize the GUI
-		initialize();
 	}
 
 	/**
